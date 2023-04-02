@@ -32,9 +32,7 @@ SAD_FACES = [
 ]
 
 def success(message: str = ''):
-    output = random.choice(HAPPY_FACES) + ' ' + message
-    print(output)
+    print(f'{random.choice(HAPPY_FACES)} {message}')
 
 def failure(message: str = ''):
-    output = random.choice(SAD_FACES) + ' ' + message
-    print(output)
+    print(f'{random.choice(SAD_FACES)} {message}')

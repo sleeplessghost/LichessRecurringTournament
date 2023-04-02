@@ -1,5 +1,8 @@
 from typing import List
 import typer
+from models.lichess.ClockIncrement import ClockIncrement
+from models.lichess.ClockTime import ClockTime
+from models.lichess.Variant import Variant
 from util.funi import success
 
 # Config
@@ -15,14 +18,23 @@ RECURRENCE_TYPE = typer.Option(..., prompt="How often should the tournament repe
 START_DATE_TIME = typer.Option(..., formats=["%Y-%m-%d %H:%M:%S"], prompt="What is the first date and time the tournament should occur (in your local time)? e.g. 2020-12-24 23:59:59.\nDate and time")
 VARIANT = typer.Option(..., prompt="Which chess variant should the tournament be played in?")
 RATED = typer.Option(..., prompt="Should the games be rated?")
-POSITION_FEN = typer.Option(..., prompt="Enter a custom initial position (in FEN) for all games of the tournament. Must be a legal chess position.")
-BERSERKABLE = typer.Option(..., prompt="Should the players be able to use berserk?")
 STREAKABLE = typer.Option(..., prompt="Should streaks be enabled? (After 2 wins, consecutive wins grant 4 points instead of 2)")
 HAS_CHAT = typer.Option(..., prompt="Should chat be enabled?")
-DESCRIPTION = typer.Option('', prompt="Enter a description of the tournament (optional)")
+DESCRIPTION = typer.Option("", prompt="Enter a description of the tournament (optional)")
 MIN_RATING = typer.Option(..., prompt="Enter a minimum rating to join, or leave empty to let everyone join")
 MAX_RATING = typer.Option(..., prompt="Enter a maximum rating to join, or leave empty to let everyone join")
 MIN_GAMES = typer.Option(..., prompt="Enter a minimum number of rated games to join, or leave empty to let everyone join")
+
+def berserkable_prompt(clock_time: ClockTime, clock_increment: ClockIncrement):
+    clock_time_seconds = int(clock_time) * 60
+    if int(clock_increment) <= (clock_time_seconds * 2):
+        return typer.prompt("Should the players be able to use berserk?", type=bool)
+    return False
+
+def position_fen_prompt(variant: Variant):
+    if variant == Variant.FROM_POSITION:
+        return typer.prompt("Enter a custom initial position (in FEN) for all games of the tournament. Must be a legal chess position.\nFEN", type=str)
+    return None
 
 def team_restrictions_prompt(my_teams: List[str]):
     num_teams = len(my_teams)

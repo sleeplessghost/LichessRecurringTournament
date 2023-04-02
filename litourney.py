@@ -53,13 +53,8 @@ def new(name: str = prompts.TOURNEY_NAME,
     """
     Configure a new recurring tournament
     """
-    clock_time_seconds = int(clock_time) * 60
-    berserkable = False
-    if int(clock_increment) <= (clock_time_seconds * 2):
-        berserkable = prompts.BERSERKABLE
-    position_FEN = None
-    if variant == Variant.FROM_POSITION:
-        position_FEN = prompts.POSITION_FEN
+    berserkable = prompts.berserkable_prompt(clock_time, clock_increment)
+    position_FEN = prompts.position_fen_prompt(variant)
     #TODO get actual teams
     team_restriction = prompts.team_restrictions_prompt(['my', 'teams'])
     #TODO handle date properly
