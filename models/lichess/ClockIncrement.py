@@ -1,6 +1,6 @@
 from enum import Enum
 
-class ClockIncrement(Enum):
+class ClockIncrement(str, Enum):
     SECONDS_0 = '0'
     SECONDS_1 = '1'
     SECONDS_2 = '2'
@@ -17,3 +17,6 @@ class ClockIncrement(Enum):
     SECONDS_40 = '40'
     SECONDS_50 = '50'
     SECONDS_60 = '60'
+
+    def int_val(self):
+        return int(self.value)

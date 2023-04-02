@@ -10,25 +10,25 @@ API_KEY = typer.Option(..., prompt="Enter your Lichess API key")
 NUM_DAYS =  typer.Option(..., prompt="How many days in the future should tournaments be created?")
 
 # Tournament
-TOURNEY_NAME = typer.Option("", prompt="What name should be used for the tournament? Leave empty to get a random Grandmaster name")
-CLOCK_TIME = typer.Option(..., prompt="Enter clock initial time in minutes")
-CLOCK_INCREMENT = typer.Option(..., prompt="Enter clock increment in seconds")
-TOURNEY_LENGTH = typer.Option(..., prompt="How long should the tournament last, in minutes?")
+TOURNEY_NAME = typer.Option("", prompt="Tournament name? Leave empty to get a random Grandmaster name")
+CLOCK_TIME = typer.Option(..., prompt="Initial clock time (in minutes)?")
+CLOCK_INCREMENT = typer.Option(..., prompt="Clock increment (in seconds)?")
+TOURNEY_LENGTH = typer.Option(..., prompt="Tournament length (in minutes)?")
 RECURRENCE_TYPE = typer.Option(..., prompt="How often should the tournament repeat?")
 START_DATE_TIME = typer.Option(..., formats=["%Y-%m-%d %H:%M:%S"], prompt="What is the first date and time the tournament should occur (in your local time)? e.g. 2020-12-24 23:59:59.\nDate and time")
-VARIANT = typer.Option(..., prompt="Which chess variant should the tournament be played in?")
-RATED = typer.Option(..., prompt="Should the games be rated?")
-STREAKABLE = typer.Option(..., prompt="Should streaks be enabled? (After 2 wins, consecutive wins grant 4 points instead of 2)")
-HAS_CHAT = typer.Option(..., prompt="Should chat be enabled?")
-DESCRIPTION = typer.Option("", prompt="Enter a description of the tournament (optional)")
-MIN_RATING = typer.Option(..., prompt="Enter a minimum rating to join, or leave empty to let everyone join")
-MAX_RATING = typer.Option(..., prompt="Enter a maximum rating to join, or leave empty to let everyone join")
-MIN_GAMES = typer.Option(..., prompt="Enter a minimum number of rated games to join, or leave empty to let everyone join")
+VARIANT = typer.Option(..., prompt="Chess variant?")
+RATED = typer.Option(..., prompt="Rated games?")
+STREAKABLE = typer.Option(..., prompt="Enable streaks? (After 2 wins, consecutive wins grant 4 points instead of 2)")
+HAS_CHAT = typer.Option(..., prompt="Enable chat?")
+DESCRIPTION = typer.Option("", prompt="Tournament description (optional)")
+MIN_RATING = typer.Option(..., prompt="Required minimum rating?")
+MAX_RATING = typer.Option(..., prompt="Required maximum rating?")
+MIN_GAMES = typer.Option(..., prompt="Required minimum rated games played?")
 
 def berserkable_prompt(clock_time: ClockTime, clock_increment: ClockIncrement):
-    clock_time_seconds = int(clock_time) * 60
-    if int(clock_increment) <= (clock_time_seconds * 2):
-        return typer.prompt("Should the players be able to use berserk?", type=bool)
+    clock_time_seconds = clock_time.int_val() * 60
+    if clock_increment.int_val() <= (clock_time_seconds * 2):
+        return typer.prompt("Enable berserking?", type=bool)
     return False
 
 def position_fen_prompt(variant: Variant):

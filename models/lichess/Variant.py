@@ -1,6 +1,6 @@
 from enum import Enum
 
-class Variant(Enum):
+class Variant(str, Enum):
     STANDARD = "standard"
     CHESS960 = "chess960"
     CRAZYHOUSE = "crazyhouse"

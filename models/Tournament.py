@@ -1,4 +1,9 @@
 from datetime import datetime
+import json
+import os
+from typing import List
+
+import typer
 from models.RecurrenceType import RecurrenceType
 from models.lichess.ClockTime import ClockTime
 from models.lichess.ClockIncrement import ClockIncrement
@@ -6,13 +11,15 @@ from models.lichess.GamesRestriction import GamesRestriction
 from models.lichess.RatingRestriction import RatingRestriction
 from models.lichess.TournamentLength import TournamentLength
 from models.lichess.Variant import Variant
+import util.constants as constants
+from util.funi import failure
 
 class Tournament:
     def __init__(self,
                  name: str,
                  clock_time: ClockTime,
                  clock_increment: ClockIncrement,
-                 length: TournamentLength,
+                 length_mins: TournamentLength,
                  recurrence: RecurrenceType,
                  first_date_utc: datetime,
                  variant: Variant,
@@ -29,7 +36,7 @@ class Tournament:
         self.name = name
         self.clock_time = clock_time
         self.clock_increment = clock_increment
-        self.length_mins = length
+        self.length_mins = length_mins
         self.recurrence = recurrence
         self.first_date_utc = first_date_utc
         self.variant = variant
@@ -43,3 +50,27 @@ class Tournament:
         self.min_rating = min_rating
         self.max_rating = max_rating
         self.min_games = min_games
+
+def tournament_json_serializer(obj):
+    if isinstance(obj, Tournament):
+        return obj.__dict__
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    return obj
+
+def save_tournaments(tourneys: List[Tournament]):
+    with open(constants.TOURNAMENTS_FILENAME, 'w') as tourneysFile:
+        tourneysFile.write(json.dumps(tourneys, default=tournament_json_serializer))
+
+def load_tournaments() -> List[Tournament]:
+    try:
+        if not os.path.exists(constants.TOURNAMENTS_FILENAME):
+            return []
+        with open(constants.TOURNAMENTS_FILENAME, 'r') as tourneysFile:
+            return [Tournament(**data) for data in json.loads(tourneysFile.read())]
+    except:
+        failure('Failed to read tournaments file')
+        if os.path.exists(constants.TOURNAMENTS_FILENAME):
+            do_reset = typer.prompt("Do you want to delete the tournaments file and start again?", type=bool)
+            if (do_reset): os.remove(constants.TOURNAMENTS_FILENAME)
+        quit()

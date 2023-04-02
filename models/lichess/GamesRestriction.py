@@ -1,6 +1,7 @@
 from enum import Enum
 
-class GamesRestriction(Enum):
+class GamesRestriction(str, Enum):
+    NONE = 'none'
     GAMES_0 = '0'
     GAMES_5 = '5'
     GAMES_10 = '10'
@@ -13,3 +14,6 @@ class GamesRestriction(Enum):
     GAMES_100 = '100'
     GAMES_150 = '150'
     GAMES_200 = '200'
+
+    def int_val(self):
+        return int(self.value)

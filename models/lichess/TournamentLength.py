@@ -1,6 +1,6 @@
 from enum import Enum
 
-class TournamentLength(Enum):
+class TournamentLength(str, Enum):
     MINUTES_20 = '20'
     MINUTES_25 = '25'
     MINUTES_30 = '30'
@@ -29,3 +29,6 @@ class TournamentLength(Enum):
     MINUTES_540 = '540'
     MINUTES_600 = '600'
     MINUTES_720 = '720'
+
+    def int_val(self):
+        return int(self.value)

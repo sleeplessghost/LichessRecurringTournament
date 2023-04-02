@@ -1,6 +1,6 @@
 from enum import Enum
 
-class RatingRestriction(Enum):
+class RatingRestriction(str, Enum):
     NONE = 'none'
     RATING_1000 = '1000'
     RATING_1100 = '1100'
@@ -19,3 +19,6 @@ class RatingRestriction(Enum):
     RATING_2400 = '2400'
     RATING_2500 = '2500'
     RATING_2600 = '2600'
+
+    def int_val(self):
+        return int(self.value)
