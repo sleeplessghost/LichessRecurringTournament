@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class RatingRestriction(str, Enum):
+class RatingRestriction(StrEnum):
     NONE = 'none'
     RATING_1000 = '1000'
     RATING_1100 = '1100'

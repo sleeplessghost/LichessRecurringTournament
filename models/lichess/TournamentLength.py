@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class TournamentLength(str, Enum):
+class TournamentLength(StrEnum):
     MINUTES_20 = '20'
     MINUTES_25 = '25'
     MINUTES_30 = '30'

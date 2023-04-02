@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class GamesRestriction(str, Enum):
+class GamesRestriction(StrEnum):
     NONE = 'none'
     GAMES_0 = '0'
     GAMES_5 = '5'

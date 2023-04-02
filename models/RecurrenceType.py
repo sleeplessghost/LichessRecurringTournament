@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class RecurrenceType(str, Enum):
+class RecurrenceType(StrEnum):
     DAILY = "daily"
     WEEKLY = "weekly"
     FORTNIGHTLY = "fortnightly"

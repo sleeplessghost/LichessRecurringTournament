@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class ClockIncrement(str, Enum):
+class ClockIncrement(StrEnum):
     SECONDS_0 = '0'
     SECONDS_1 = '1'
     SECONDS_2 = '2'

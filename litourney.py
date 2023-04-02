@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 import typer
 from models.RecurrenceType import RecurrenceType
-from models.Tournament import Tournament, load_tournaments, save_tournaments
+from models.Tournament import Tournament, load_tournaments, save_tournaments, tournament_json_serializer
 from models.lichess.ClockIncrement import ClockIncrement
 from models.lichess.ClockTime import ClockTime
 from models.lichess.GamesRestriction import GamesRestriction
@@ -12,6 +12,7 @@ from models.lichess.Variant import Variant
 import util.prompts as prompts
 from models.Config import Config
 from util.funi import success
+from rich import print, print_json
 
 app = typer.Typer()
 
@@ -67,13 +68,17 @@ def new(name: str = prompts.TOURNEY_NAME,
     existing = load_tournaments()
     existing.append(tournament)
     save_tournaments(existing)
+    success()
 
 @app.command()
 def list():
     """
     Lists configured tournaments
     """
-    print(list)
+    existing = load_tournaments()
+    mapped = [tourney.describe() for tourney in existing]
+    for (i, desc) in enumerate(mapped):
+        print(f'{i+1}:  {desc}')
 
 @app.command()
 def delete(id: int):

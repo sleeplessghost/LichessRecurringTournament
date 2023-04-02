@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class ClockTime(str, Enum):
+class ClockTime(StrEnum):
     SECONDS_0 = '0'
     SECONDS_15 = '0.25'
     SECONDS_30 = '0.5'
