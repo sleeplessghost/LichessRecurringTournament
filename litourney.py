@@ -1,10 +1,9 @@
 from datetime import datetime, timezone
-import json
 from typing import List
 import typer
 from models.RecurrenceType import RecurrenceType
 from models.Tournament import Tournament, load_tournaments, save_tournaments, tournament_json_serializer
-from models.UserInfo import load_user_info
+from models.UserInfo import UserInfo, load_user_info
 from models.lichess.ClockIncrement import ClockIncrement
 from models.lichess.ClockTime import ClockTime
 from models.lichess.GamesRestriction import GamesRestriction
@@ -12,9 +11,10 @@ from models.lichess.RatingRestriction import RatingRestriction
 from models.lichess.TournamentLength import TournamentLength
 from models.lichess.Variant import Variant
 import util.prompts as prompts
-from models.Config import Config
+from models.Config import Config, load_config
 from util.funi import success
 from rich import print
+import util.lichess_api as lichess
 
 app = typer.Typer()
 
@@ -24,14 +24,19 @@ def setup(api_key: str = prompts.API_KEY, num_days: int = prompts.NUM_DAYS):
     Setup config file
     """
     Config(api_key, num_days).save()
-    success()
+    success('configured')
 
 @app.command()
 def refresh():
     """
     Refresh lichess information (teams you can access)
     """
-    print("refresh")
+    config = load_config()
+    username = lichess.username(config.api_key)
+    teams = lichess.teams(config.api_key, username)
+    user = UserInfo(username, teams)
+    user.save()
+    success(f'username: {user.username}, teams: {user.teams}')
 
 @app.command()
 def create():
@@ -61,7 +66,7 @@ def new(name: str = prompts.TOURNEY_NAME,
     berserkable = prompts.berserkable_prompt(clock_time, clock_increment)
     position_FEN = prompts.position_fen_prompt(variant)
     user_info = load_user_info()
-    team_restriction = prompts.team_restrictions_prompt(user_info)
+    team_restriction = prompts.team_restrictions_prompt(user_info.teams)
     date_utc = start_date_time.astimezone(timezone.utc)
     tournament = Tournament(name, clock_time, clock_increment, tournament_length, recurrence, date_utc,
                             variant, rated, position_FEN, berserkable, streakable, has_chat, description,
@@ -69,7 +74,7 @@ def new(name: str = prompts.TOURNEY_NAME,
     existing = load_tournaments()
     existing.append(tournament)
     save_tournaments(existing)
-    success()
+    success(f'{tournament.name} saved')
 
 @app.command()
 def list():
@@ -86,14 +91,18 @@ def delete(delete_all: bool = False):
     """
     if delete_all:
         save_tournaments([])
+        success('all gone')
     else:
         tourneys = load_tournaments()
         print_tourneys(tourneys)
         id = typer.prompt('Which tournament should be deleted? Or 0 to cancel', type=int)
+        tournament = None
         if id > 0:
+            tournament = tourneys[id-1]
             del tourneys[id-1]
             save_tournaments(tourneys)
-    success()
+        message = '' if tournament is None else f'{tournament.name} deleted'
+        success(message)
     
 def print_tourneys(tourneys: List[Tournament]):
     mapped = [tourney.describe() for tourney in tourneys]

@@ -1,5 +1,6 @@
 import random
 from rich import print
+import time
 
 HAPPY_FACES = [
     '(´・ω・｀)',
@@ -31,8 +32,20 @@ SAD_FACES = [
     '(ᗒᗩᗕ)'
 ]
 
+states = [
+    "(ヘ･_･)ヘ┳━┳",
+    "(┛°Д°)┛︵┻━┻",
+]
+
 def success(message: str = ''):
     print(f'{random.choice(HAPPY_FACES)} {message}')
 
 def failure(message: str = ''):
     print(f'{random.choice(SAD_FACES)} {message}')
+
+def wait(seconds: int):
+    i = 0
+    while i <= seconds:
+        print(states[i % len(states)], end="\r")
+        time.sleep(1)
+        i += 1
