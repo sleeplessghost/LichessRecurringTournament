@@ -1,6 +1,6 @@
 import typer
-import util.config as config
 import util.prompts as prompts
+from models.config import Config
 
 app = typer.Typer()
 
@@ -9,7 +9,7 @@ def setup(api_key: str = prompts.API_KEY, num_days: int = prompts.NUM_DAYS):
     """
     Setup config file
     """
-    config.write(api_key, num_days)
+    Config(api_key, num_days).save()
 
 @app.command()
 def refresh():

@@ -1,3 +1,1 @@
 CONFIG_FILENAME = "config.json"
-CONFIG_API_KEY = "ApiKey"
-CONFIG_NUM_DAYS = "NumDays"
