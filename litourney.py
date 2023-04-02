@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 from typing import List
 import typer
@@ -62,8 +62,7 @@ def new(name: str = prompts.TOURNEY_NAME,
     position_FEN = prompts.position_fen_prompt(variant)
     user_info = load_user_info()
     team_restriction = prompts.team_restrictions_prompt(user_info)
-    #TODO handle date properly
-    date_utc = datetime.now()
+    date_utc = start_date_time.astimezone(timezone.utc)
     tournament = Tournament(name, clock_time, clock_increment, tournament_length, recurrence, date_utc,
                             variant, rated, position_FEN, berserkable, streakable, has_chat, description,
                             team_restriction, min_rating, max_rating, min_games)

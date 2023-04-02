@@ -11,7 +11,7 @@ from models.lichess.RatingRestriction import RatingRestriction
 from models.lichess.TournamentLength import TournamentLength
 from models.lichess.Variant import Variant
 import util.constants as constants
-from util.funi import failure
+from util.funi import failure, success
 
 class Tournament:
     def __init__(self,
@@ -102,4 +102,5 @@ def load_tournaments() -> List[Tournament]:
         if os.path.exists(constants.TOURNAMENTS_FILENAME):
             do_reset = typer.prompt("Do you want to delete the tournaments file and start again?", type=bool)
             if (do_reset): os.remove(constants.TOURNAMENTS_FILENAME)
+            success()
         quit()
