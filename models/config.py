@@ -20,4 +20,4 @@ def load_config() -> Config:
             return loaded
     except:
         failure('Config file not found or misconfigured, try running the setup command')
-        return None
+        quit()

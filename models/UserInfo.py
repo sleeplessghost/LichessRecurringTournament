@@ -29,4 +29,4 @@ def load_user_info() -> UserInfo:
             return loaded
     except:
         failure('User info file not found or misconfigured, try running the refresh command')
-        return None
+        quit()

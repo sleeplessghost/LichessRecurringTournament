@@ -2,7 +2,6 @@ from datetime import datetime
 import json
 import os
 from typing import List
-
 import typer
 from models.RecurrenceType import RecurrenceType
 from models.lichess.ClockTime import ClockTime
