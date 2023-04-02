@@ -1,10 +1,11 @@
 import typer
 import util.config as config
+import util.prompts as prompts
 
 app = typer.Typer()
 
 @app.command()
-def setup(api_key: str = typer.Option(..., prompt="Enter your Lichess API key"), num_days: int = typer.Option(..., prompt="How many days in the future should tournaments be created?")):
+def setup(api_key: str = prompts.API_KEY, num_days: int = prompts.NUM_DAYS):
     """
     Setup config file
     """
