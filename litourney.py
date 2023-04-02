@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+from typing import List
 import typer
 from models.RecurrenceType import RecurrenceType
 from models.Tournament import Tournament, load_tournaments, save_tournaments, tournament_json_serializer
@@ -13,7 +14,7 @@ from models.lichess.Variant import Variant
 import util.prompts as prompts
 from models.Config import Config
 from util.funi import success
-from rich import print, print_json
+from rich import print
 
 app = typer.Typer()
 
@@ -76,17 +77,29 @@ def list():
     """
     Lists configured tournaments
     """
-    existing = load_tournaments()
-    mapped = [tourney.describe() for tourney in existing]
-    for (i, desc) in enumerate(mapped):
-        print(f'{i+1}:  {desc}')
+    tourneys = load_tournaments()
+    print_tourneys(tourneys)
 
 @app.command()
-def delete(id: int):
+def delete(delete_all: bool = False):
     """
     Deletes a configured tournament
     """
-    print("delete")
+    if delete_all:
+        save_tournaments([])
+    else:
+        tourneys = load_tournaments()
+        print_tourneys(tourneys)
+        id = typer.prompt('Which tournament should be deleted? Or 0 to cancel', type=int)
+        if id > 0:
+            del tourneys[id-1]
+            save_tournaments(tourneys)
+    success()
+    
+def print_tourneys(tourneys: List[Tournament]):
+    mapped = [tourney.describe() for tourney in tourneys]
+    for (i, desc) in enumerate(mapped):
+        print(f'{i+1}:  {desc}')
 
 if __name__ == "__main__":
     app()

@@ -43,10 +43,10 @@ def team_restrictions_prompt(user_info: UserInfo):
         success("You have no teams so the option to restrict tournament to a particular team is not shown")
         return None
     elif num_teams == 1:
-        restrict: bool = typer.prompt(f'Do you want to restrict the tourney to your team ({user_info.teams[0]})', type=bool)
+        restrict = typer.prompt(f'Do you want to restrict the tourney to your team ({user_info.teams[0]})', type=bool)
         return user_info.teams[0] if restrict else None
     else:
         team_list = '\n'.join(f'    {i+1}: {team}' for (i,team) in enumerate(user_info.teams))
         message = f'Pick a team to restrict the tourney to:\n    0: Unrestricted\n{team_list}\nTeam'
-        id: int = typer.prompt(message, type=int)
+        id = typer.prompt(message, type=int)
         return None if id == 0 else user_info.teams[id-1]
