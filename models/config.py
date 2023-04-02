@@ -2,7 +2,7 @@ import typer
 import json
 import util.constants as constants
 
-class Config():
+class Config:
     def __init__(self, api_key: str, num_days: int):
         self.api_key = api_key
         self.num_days = num_days

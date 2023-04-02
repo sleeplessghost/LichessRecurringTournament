@@ -1,6 +1,6 @@
 import typer
 import util.prompts as prompts
-from models.config import Config
+from models.Config import Config
 
 app = typer.Typer()
 
