@@ -1,5 +1,6 @@
 from typing import List
 import typer
+from models.UserInfo import UserInfo
 from models.lichess.ClockIncrement import ClockIncrement
 from models.lichess.ClockTime import ClockTime
 from models.lichess.Variant import Variant
@@ -36,16 +37,16 @@ def position_fen_prompt(variant: Variant):
         return typer.prompt("Enter a custom initial position (in FEN) for all games of the tournament. Must be a legal chess position.\nFEN", type=str)
     return None
 
-def team_restrictions_prompt(my_teams: List[str]):
-    num_teams = len(my_teams)
+def team_restrictions_prompt(user_info: UserInfo):
+    num_teams = len(user_info.teams)
     if num_teams == 0:
         success("You have no teams so the option to restrict tournament to a particular team is not shown")
         return None
     elif num_teams == 1:
-        restrict: bool = typer.prompt(f'Do you want to restrict the tourney to your team ({my_teams[0]})', type=bool)
-        return my_teams[0] if restrict else None
+        restrict: bool = typer.prompt(f'Do you want to restrict the tourney to your team ({user_info.teams[0]})', type=bool)
+        return user_info.teams[0] if restrict else None
     else:
-        team_list = '\n'.join(f'    {i+1}: {team}' for (i,team) in enumerate(my_teams))
+        team_list = '\n'.join(f'    {i+1}: {team}' for (i,team) in enumerate(user_info.teams))
         message = f'Pick a team to restrict the tourney to:\n    0: Unrestricted\n{team_list}\nTeam'
         id: int = typer.prompt(message, type=int)
-        return None if id == 0 else my_teams[id-1]
+        return None if id == 0 else user_info.teams[id-1]

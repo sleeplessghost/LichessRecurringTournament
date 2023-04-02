@@ -3,6 +3,7 @@ import json
 import typer
 from models.RecurrenceType import RecurrenceType
 from models.Tournament import Tournament, load_tournaments, save_tournaments, tournament_json_serializer
+from models.UserInfo import load_user_info
 from models.lichess.ClockIncrement import ClockIncrement
 from models.lichess.ClockTime import ClockTime
 from models.lichess.GamesRestriction import GamesRestriction
@@ -58,8 +59,8 @@ def new(name: str = prompts.TOURNEY_NAME,
     """
     berserkable = prompts.berserkable_prompt(clock_time, clock_increment)
     position_FEN = prompts.position_fen_prompt(variant)
-    #TODO get actual teams
-    team_restriction = prompts.team_restrictions_prompt(['my', 'teams'])
+    user_info = load_user_info()
+    team_restriction = prompts.team_restrictions_prompt(user_info)
     #TODO handle date properly
     date_utc = datetime.now()
     tournament = Tournament(name, clock_time, clock_increment, tournament_length, recurrence, date_utc,
