@@ -1,4 +1,5 @@
 import random
+from rich import print
 
 HAPPY_FACES = [
     '(´・ω・｀)',
@@ -30,8 +31,9 @@ SAD_FACES = [
     '(ᗒᗩᗕ)'
 ]
 
-def success():
-    print(random.choice(HAPPY_FACES))
+def success(message: str = ''):
+    output = random.choice(HAPPY_FACES) + ' ' + message
+    print(output)
 
 def failure(message: str = ''):
     output = random.choice(SAD_FACES) + ' ' + message

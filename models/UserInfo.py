@@ -1,7 +1,7 @@
 import json
-import typer
 from typing import List
 import util.constants as constants
+from util.funi import failure
 
 class UserInfo:
     def __init__(self, username: str, teams: List[str] = []):
@@ -28,5 +28,5 @@ def load_user_info() -> UserInfo:
                 raise Warning('User info is misconfigured')
             return loaded
     except:
-        typer.echo('User info file not found or misconfigured, try running the refresh command')
+        failure('User info file not found or misconfigured, try running the refresh command')
         return None

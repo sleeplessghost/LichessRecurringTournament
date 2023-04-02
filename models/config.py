@@ -1,6 +1,6 @@
-import typer
 import json
 import util.constants as constants
+from util.funi import failure
 
 class Config:
     def __init__(self, api_key: str, num_days: int):
@@ -19,5 +19,5 @@ def load_config() -> Config:
                 raise Warning('Config is misconfigured')
             return loaded
     except:
-        typer.echo('Config file not found or misconfigured, try running the setup command')
+        failure('Config file not found or misconfigured, try running the setup command')
         return None
