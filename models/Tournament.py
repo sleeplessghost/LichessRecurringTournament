@@ -131,7 +131,18 @@ class Tournament:
             if with_output: failure('[red bold]INVALID[/red bold] Reduce tournament duration, or increase game clock')
             valid = False
         return valid
-        
+
+    def get_pm_message(self, created: TournamentResponse):
+        if not self.team_pm_template or not self.team_restriction:
+            return None
+        message = self.team_pm_template
+        message = message.replace('[name]', self.name)
+        message = message.replace('[variant]', self.variant.value)
+        message = message.replace('[clocktime]', self.clock_time.value)
+        message = message.replace('[clockincrement]', self.clock_increment.value)
+        message = message.replace('[link]', f'https://lichess.org/tournament/{created.id}')
+        message = message.replace('[br]', '\n')
+        return message
 
 def tournament_json_serializer(obj):
     if isinstance(obj, Tournament):
