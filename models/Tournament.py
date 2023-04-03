@@ -32,7 +32,9 @@ class Tournament:
                  team_restriction: str,
                  min_rating: RatingRestriction,
                  max_rating: RatingRestriction,
-                 min_games: GamesRestriction):
+                 min_games: GamesRestriction,
+                 last_notified: datetime,
+                 team_pm_template: str):
         self.name = name
         self.clock_time = clock_time
         self.clock_increment = clock_increment
@@ -50,6 +52,8 @@ class Tournament:
         self.min_rating = min_rating
         self.max_rating = max_rating
         self.min_games = min_games
+        self.last_notified = last_notified
+        self.team_pm_template = team_pm_template
 
     def describe(self) -> str:
         valid = self.is_valid()

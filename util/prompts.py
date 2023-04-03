@@ -26,7 +26,8 @@ class AwfulTournamentEnum(StrEnum):
     team_restriction = 'team_restriction'
     min_rating = 'min_rating'
     max_rating = 'max_rating'
-    min_games = 'min_games'
+    min_games = 'min_games',
+    team_pm_template = 'team_pm_template',
     cancel = 'exit'
 
 # Config
@@ -73,6 +74,21 @@ def team_restrictions_prompt(teams: List[str]):
         message = f'Pick a team to restrict the tourney to:\n    0: Unrestricted\n{team_list}\nTeam'
         id = typer.prompt(message, type=int)
         return None if id == 0 else teams[id-1]
+
+def team_pm_template_prompt(team_id: str):
+    if team_id is None:
+        return ''
+    prompt_msg = """Do you want to send a 24 hour pre-tournament PM reminder to the team? If so, enter a template to be used for the PM.
+Special values which will be automatically replaced (including square brackets):
+    [name] : Tournament name
+    [variant] : Variant used for the tournament
+    [clocktime] : Initial clock time
+    [clockincrement] : Clock increment
+    [link] : Link to the tournament
+    [br] : Line break
+If you don't want to send a PM reminder, you can leave this blank.
+Template"""
+    return typer.prompt(prompt_msg, type=str, default="", show_choices=False)
 
 def edit_tournament_property_prompt(tournament: Tournament):
     type_mappings = {prop: type(tournament.__dict__[(prop)]) for prop in AwfulTournamentEnum if prop != 'exit'}

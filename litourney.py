@@ -86,10 +86,12 @@ def new(name: str = prompts.TOURNEY_NAME,
     position_FEN = prompts.position_fen_prompt(variant)
     user_info = load_user_info()
     team_restriction = prompts.team_restrictions_prompt(user_info.teams)
+    pm_template = '' if team_restriction is None else prompts.team_pm_template_prompt(team_restriction)
     date_utc = start_date_time.astimezone(timezone.utc)
+    last_notified = None
     tournament = Tournament(name, clock_time, clock_increment, tournament_length, recurrence, date_utc,
                             variant, rated, position_FEN, berserkable, streakable, has_chat, description,
-                            team_restriction, min_rating, max_rating, min_games)
+                            team_restriction, min_rating, max_rating, min_games, last_notified, pm_template)
     existing = load_tournaments()
     existing.append(tournament)
     save_tournaments(existing)
@@ -110,7 +112,9 @@ def edit():
         while editing:
             print()
             for attribute,value in tourney.__dict__.items():
-                print(f'{attribute} = {value}')
+                msg = f'{attribute} = {value}'
+                if attribute == 'team_pm_template': typer.echo(msg)
+                else: print(msg)
             tourney.is_valid(with_output=True)
             editing = prompts.edit_tournament_property_prompt(tourney)
             save_tournaments(tourneys)
