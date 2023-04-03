@@ -117,7 +117,7 @@ class Tournament:
             if with_output: failure('[red bold]INVALID[/red bold] Clock time and increment must add to more than 0')
             valid = False
         if self.rated:
-            allow_rated = self.variant == Variant.STANDARD or self.clock_time.float_val() > 0 or self.clock_increment.int_val() > 0
+            allow_rated = self.variant == Variant.STANDARD or self.clock_time.float_val() > 0 or self.clock_increment.int_val() > 1
             if not allow_rated:
                 if with_output: failure('[red bold]INVALID[/red bold] Rated games require standard variant or longer clock_time / clock_increment')
                 valid = False
