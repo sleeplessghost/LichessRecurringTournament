@@ -27,12 +27,11 @@ def my_tournaments(api_key: str, username: str):
 
 def create_tournament(api_key: str, tournament: Tournament):
     url = f'{BASE_URL}/tournament'
-    start_date = tournament.first_date_utc #tournament.get_next_date()
     data = {
         'clockTime' : tournament.clock_time.float_val(),
         'clockIncrement': tournament.clock_increment.int_val(),
         'minutes': tournament.length_mins.int_val(),
-        'startDate': int(start_date.timestamp() * 1000),
+        'startDate': int(tournament.get_next_date().timestamp() * 1000),
         'variant': tournament.variant.value,
         'rated': tournament.rated,
         'berserkable': tournament.berserkable,

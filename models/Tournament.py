@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import json
 import os
-from typing import List, Self
+from typing import List
 import typer
 from models.RecurrenceType import RecurrenceType
 from models.lichess.ClockTime import ClockTime
@@ -63,8 +63,29 @@ class Tournament:
                                     date=self.get_next_date().strftime("%Y-%m-%d %H:%M:%S"))
 
     def get_next_date(self) -> datetime:
-        #TODO implement this
-        return datetime.now()
+        utc_now = datetime.now().astimezone(timezone.utc)
+        if self.first_date_utc >= utc_now:
+            return self.first_date_utc
+        next_date = datetime(utc_now.year, utc_now.month, utc_now.day, self.first_date_utc.hour, self.first_date_utc.minute, self.first_date_utc.second, tzinfo=timezone.utc)
+        if self.recurrence == RecurrenceType.DAILY:
+            if next_date < utc_now:
+                next_date += timedelta(days=1)
+        elif self.recurrence == RecurrenceType.WEEKLY or self.recurrence == RecurrenceType.FORTNIGHTLY:
+            original_weekday = self.first_date_utc.weekday()
+            next_weekday = next_date.weekday()
+            if next_date < utc_now or next_weekday != original_weekday:
+                days = (original_weekday - next_weekday) % 7
+                next_date += timedelta(days=days)
+            if self.recurrence == RecurrenceType.FORTNIGHTLY:
+                weeks_between = (next_date - self.first_date_utc).days // 7
+                if weeks_between % 2 != 0:
+                    next_date += timedelta(days=7)
+        elif self.recurrence == RecurrenceType.MONTHLY:
+            if next_date < utc_now or next_date.day != self.first_date_utc.day:
+                next_date = datetime(utc_now.year, utc_now.month + 1, self.first_date_utc.day, self.first_date_utc.hour, self.first_date_utc.minute, self.first_date_utc.second, tzinfo=timezone.utc)
+        else:
+            raise Warning(f'unhandled Recurrence type: {self.recurrence}')
+        return next_date
 
     def has_restrictions(self) -> bool:
         return self.team_restriction is not None or self.min_rating != RatingRestriction.NONE or self.max_rating != RatingRestriction.NONE or self.min_games != GamesRestriction.NONE
@@ -73,12 +94,11 @@ class Tournament:
         return any(self.matches(t) for t in created)
 
     def matches(self, existing: TournamentResponse) -> bool:
-        #TODO proper date
         return (
             (self.name == '' or self.name == existing.name) and
             self.rated == existing.rated and
             self.clock_increment.int_val() == existing.clock_increment and
-            int(self.first_date_utc.timestamp() * 1000) == existing.starts_at_ms and
+            int(self.get_next_date().timestamp() * 1000) == existing.starts_at_ms and
             self.variant == existing.variant
         )
 
