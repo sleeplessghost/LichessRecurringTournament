@@ -52,10 +52,14 @@ class Tournament:
         self.min_games = min_games
 
     def describe(self) -> str:
-        return '''[bold]{name}[/bold] [italic]{description}[/italic]
+        valid = self.is_valid()
+        title = '[bold]{name}[/bold] [italic]{description}[/italic]'
+        if not self.is_valid():
+            title += ' [red bold]INVALID[/red bold]'
+        title = title.format(name=self.name, description=f'({self.description})' if self.description else '')
+        return '''{title}
     [red]{recurrence}[/red] [yellow]{variant}[/yellow] [blue]{time}[/blue]+[green]{increment}[/green]
-    Next tournament: {date}'''.format(name=self.name,
-                                    description=f'({self.description})' if self.description else '',
+    Next tournament: {date}'''.format(title=title,
                                     recurrence=self.recurrence,
                                     time=self.clock_time.value,
                                     increment=self.clock_increment.value,
@@ -101,6 +105,28 @@ class Tournament:
             int(self.get_next_date().timestamp() * 1000) == existing.starts_at_ms and
             self.variant == existing.variant
         )
+
+    def is_valid(self, with_output: bool = False):
+        # conditions from https://github.com/lichess-org/lila/blob/master/modules/tournament/src/main/TournamentForm.scala
+        valid = True
+        if self.clock_time.float_val() + self.clock_increment.int_val() == 0:
+            if with_output: failure('[red bold]INVALID[/red bold] Clock time and increment must add to more than 0')
+            valid = False
+        if self.rated:
+            allow_rated = self.variant == Variant.STANDARD or self.clock_time.float_val() > 0 or self.clock_increment.int_val() > 0
+            if not allow_rated:
+                if with_output: failure('[red bold]INVALID[/red bold] Rated games require standard variant or longer clock_time / clock_increment')
+                valid = False
+        estimated_game_seconds = (60 * self.clock_time.float_val() + 30 * self.clock_increment.int_val()) * 2 * 0.8 + 15
+        estimated_number_of_games = (self.length_mins.int_val() * 60) / estimated_game_seconds
+        if estimated_number_of_games < 3:
+            if with_output: failure('[red bold]INVALID[/red bold] Increase tournament duration, or decrease game clock')
+            valid = False
+        if estimated_number_of_games > 150:
+            if with_output: failure('[red bold]INVALID[/red bold] Reduce tournament duration, or increase game clock')
+            valid = False
+        return valid
+        
 
 def tournament_json_serializer(obj):
     if isinstance(obj, Tournament):

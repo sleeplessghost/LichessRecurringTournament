@@ -55,7 +55,7 @@ def create():
     user = load_user_info()
     tourneys = load_tournaments()
     existing = lichess.my_tournaments(config.api_key, user.username)
-    to_create = [t for t in tourneys if not t.already_created(existing)]
+    to_create = [t for t in tourneys if t.is_valid() and not t.already_created(existing)]
     if len(to_create) == 0:
         success('nothing to create')
     else:
@@ -94,6 +94,7 @@ def new(name: str = prompts.TOURNEY_NAME,
     existing.append(tournament)
     save_tournaments(existing)
     success(f'{tournament.name} saved')
+    tournament.is_valid(with_output=True)
 
 @app.command()
 def edit():
@@ -110,18 +111,24 @@ def edit():
             print()
             for attribute,value in tourney.__dict__.items():
                 print(f'{attribute} = {value}')
+            tourney.is_valid(with_output=True)
             editing = prompts.edit_tournament_property_prompt(tourney)
             save_tournaments(tourneys)
             success()
 
 @app.command()
-def delete(delete_all: bool = False):
+def delete(delete_all: bool = False, invalid: bool = False):
     """
     Deletes a configured tournament
     """
     if delete_all:
         save_tournaments([])
         success('all gone')
+    elif invalid:
+        tourneys = load_tournaments()
+        valid = [t for t in tourneys if t.is_valid()]
+        save_tournaments(valid)
+        success('invalids removed')
     else:
         tourneys = load_tournaments()
         print_tourneys(tourneys)
