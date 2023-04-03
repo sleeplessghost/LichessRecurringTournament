@@ -60,6 +60,7 @@ class Tournament:
         if not self.is_valid():
             title += ' [red bold]INVALID[/red bold]'
         title = title.format(name=self.name, description=f'({self.description})' if self.description else '')
+        local_timezone = datetime.now().tzinfo
         return '''{title}
     [red]{recurrence}[/red] [yellow]{variant}[/yellow] [blue]{time}[/blue]+[green]{increment}[/green]
     Next tournament: {date}'''.format(title=title,
@@ -67,7 +68,7 @@ class Tournament:
                                     time=self.clock_time.value,
                                     increment=self.clock_increment.value,
                                     variant=self.variant,
-                                    date=self.get_next_date().strftime("%Y-%m-%d %H:%M:%S"))
+                                    date=self.get_next_date().astimezone(local_timezone))
 
     def get_next_date(self) -> datetime:
         utc_now = datetime.now().astimezone(timezone.utc)
