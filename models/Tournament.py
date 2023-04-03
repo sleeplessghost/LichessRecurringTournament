@@ -1,7 +1,7 @@
 from datetime import datetime
 import json
 import os
-from typing import List
+from typing import List, Self
 import typer
 from models.RecurrenceType import RecurrenceType
 from models.lichess.ClockTime import ClockTime
@@ -9,6 +9,7 @@ from models.lichess.ClockIncrement import ClockIncrement
 from models.lichess.GamesRestriction import GamesRestriction
 from models.lichess.RatingRestriction import RatingRestriction
 from models.lichess.TournamentLength import TournamentLength
+from models.lichess.TournamentResponse import TournamentResponse
 from models.lichess.Variant import Variant
 import util.constants as constants
 from util.funi import failure, success
@@ -51,9 +52,10 @@ class Tournament:
         self.min_games = min_games
 
     def describe(self) -> str:
-        return '''[bold]{name}[/bold]
-    [red]{recurrence}[/red] [yellow]{variant}[/yellow] [blue]{time}+{increment}[/blue]
+        return '''[bold]{name}[/bold] [italic]{description}[/italic]
+    [red]{recurrence}[/red] [yellow]{variant}[/yellow] [blue]{time}[/blue]+[green]{increment}[/green]
     Next tournament: {date}'''.format(name=self.name,
+                                    description=f'({self.description})' if self.description else '',
                                     recurrence=self.recurrence,
                                     time=self.clock_time.value,
                                     increment=self.clock_increment.value,
@@ -63,6 +65,22 @@ class Tournament:
     def get_next_date(self) -> datetime:
         #TODO implement this
         return datetime.now()
+
+    def has_restrictions(self) -> bool:
+        return self.team_restriction is not None or self.min_rating != RatingRestriction.NONE or self.max_rating != RatingRestriction.NONE or self.min_games != GamesRestriction.NONE
+
+    def already_created(self, created: List[TournamentResponse]) -> bool:
+        return any(self.matches(t) for t in created)
+
+    def matches(self, existing: TournamentResponse) -> bool:
+        #TODO proper date
+        return (
+            (self.name == '' or self.name == existing.name) and
+            self.rated == existing.rated and
+            self.clock_increment.int_val() == existing.clock_increment and
+            int(self.first_date_utc.timestamp() * 1000) == existing.starts_at_ms and
+            self.variant == existing.variant
+        )
 
 def tournament_json_serializer(obj):
     if isinstance(obj, Tournament):

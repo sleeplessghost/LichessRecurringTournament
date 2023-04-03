@@ -23,5 +23,5 @@ class ClockTime(StrEnum):
     MINUTES_50 = '50'
     MINUTES_60 = '60'
 
-    def int_val(self):
-        return int(self.value)
+    def float_val(self):
+        return float(self.value)

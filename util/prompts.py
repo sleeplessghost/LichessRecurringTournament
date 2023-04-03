@@ -26,7 +26,7 @@ MAX_RATING = typer.Option(..., prompt="Required maximum rating?")
 MIN_GAMES = typer.Option(..., prompt="Required minimum rated games played?")
 
 def berserkable_prompt(clock_time: ClockTime, clock_increment: ClockIncrement):
-    clock_time_seconds = clock_time.int_val() * 60
+    clock_time_seconds = clock_time.float_val() * 60
     if clock_increment.int_val() <= (clock_time_seconds * 2):
         return typer.prompt("Enable berserking?", type=bool)
     return False

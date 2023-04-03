@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import List
 import typer
 from models.RecurrenceType import RecurrenceType
-from models.Tournament import Tournament, load_tournaments, save_tournaments, tournament_json_serializer
+from models.Tournament import Tournament, load_tournaments, save_tournaments
 from models.UserInfo import UserInfo, load_user_info
 from models.lichess.ClockIncrement import ClockIncrement
 from models.lichess.ClockTime import ClockTime
@@ -39,11 +39,30 @@ def refresh():
     success(f'username: {user.username}, teams: {user.teams}')
 
 @app.command()
+def list():
+    """
+    Lists configured tournaments
+    """
+    tourneys = load_tournaments()
+    print_tourneys(tourneys)
+
+@app.command()
 def create():
     """
     Creates configured tournaments within the next X days (from config file)
     """
-    print("create")
+    config = load_config()
+    user = load_user_info()
+    tourneys = load_tournaments()
+    existing = lichess.get_my_tournaments(config.api_key, user.username)
+    to_create = [t for t in tourneys if not t.already_created(existing)]
+    if len(to_create) == 0:
+        success('nothing to create')
+    else:
+        for tourney in to_create:
+            lichess.create_tournament(config.api_key, tourney)
+            name = tourney.name if tourney.name else 'tournament'
+            success(f'{name} created')
 
 @app.command()
 def new(name: str = prompts.TOURNEY_NAME,
@@ -77,12 +96,11 @@ def new(name: str = prompts.TOURNEY_NAME,
     success(f'{tournament.name} saved')
 
 @app.command()
-def list():
+def edit():
     """
-    Lists configured tournaments
+    Edit a configured tournament
     """
-    tourneys = load_tournaments()
-    print_tourneys(tourneys)
+    print('edit')
 
 @app.command()
 def delete(delete_all: bool = False):
@@ -103,11 +121,15 @@ def delete(delete_all: bool = False):
             save_tournaments(tourneys)
         message = '' if tournament is None else f'{tournament.name} deleted'
         success(message)
-    
+
 def print_tourneys(tourneys: List[Tournament]):
-    mapped = [tourney.describe() for tourney in tourneys]
-    for (i, desc) in enumerate(mapped):
-        print(f'{i+1}:  {desc}')
+    if len(tourneys) == 0:
+        success('there are no saved tournaments')
+        quit()
+    else:
+        mapped = [tourney.describe() for tourney in tourneys]
+        for (i, desc) in enumerate(mapped):
+            print(f'{i+1}:  {desc}')
 
 if __name__ == "__main__":
     app()
