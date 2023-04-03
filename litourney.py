@@ -83,9 +83,10 @@ def notify():
             tourney_match = next(t for t in existing if tourney.matches(t))
             message = tourney.get_pm_message(tourney_match)
             if message:
-                print(message)
+                lichess.pm_team(config.api_key, tourney.team_restriction, message)
                 tourney.last_notified = utc_now
                 save_tournaments(tourneys)
+                success(f'{tourney.team_restriction} notified for {tourney_match.full_name}')
 
 @app.command()
 def new(name: str = prompts.TOURNEY_NAME,

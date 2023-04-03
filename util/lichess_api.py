@@ -8,26 +8,26 @@ from models.lichess.TournamentResponse import TournamentResponse
 from models.lichess.Variant import Variant
 from util.funi import failure, wait
 
-BASE_URL = 'https://lichess.org/api'
+BASE_URL = 'https://lichess.org'
 
 def username(api_key: str) -> str:
-    url = f'{BASE_URL}/account'
+    url = f'{BASE_URL}/api/account'
     profile = json.loads(rate_limited_get(url, api_key))
     return profile['username']
 
 def teams(api_key: str, username: str) -> List[str]:
-    url = f'{BASE_URL}/team/of/{username}'
+    url = f'{BASE_URL}/api/team/of/{username}'
     teams_data = json.loads(rate_limited_get(url, api_key))
     return [team['id'] for team in teams_data]
 
 def my_tournaments(api_key: str, username: str):
-    url = f'{BASE_URL}/user/{username}/tournament/created?status=10'
+    url = f'{BASE_URL}/api/user/{username}/tournament/created?status=10'
     created = rate_limited_get(url, api_key).strip()
     if len(created) == 0: return []
     return [parse_created_tournament(json.loads(t)) for t in created.split('\n')]
 
 def create_tournament(api_key: str, tournament: Tournament):
-    url = f'{BASE_URL}/tournament'
+    url = f'{BASE_URL}/api/tournament'
     data = {
         'clockTime' : tournament.clock_time.float_val(),
         'clockIncrement': tournament.clock_increment.int_val(),
@@ -54,6 +54,11 @@ def create_tournament(api_key: str, tournament: Tournament):
             conditions['nbRatedGame.nb'] = tournament.min_games.int_val()
         if tournament.team_restriction != None:
             conditions['teamMember.teamId'] = tournament.team_restriction
+    rate_limited_post(url, api_key, data)
+
+def pm_team(api_key: str, team_id: str, message: str):
+    url = f'{BASE_URL}/team/{team_id}/pm-all'
+    data = {'message': message}
     rate_limited_post(url, api_key, data)
 
 def auth_header(api_key: str):
