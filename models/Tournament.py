@@ -103,7 +103,8 @@ class Tournament:
             self.rated == existing.rated and
             self.clock_increment.int_val() == existing.clock_increment and
             int(self.get_next_date().timestamp() * 1000) == existing.starts_at_ms and
-            self.variant == existing.variant
+            self.variant == existing.variant and
+            self.team_restriction == existing.required_team
         )
 
     def is_valid(self, with_output: bool = False):
