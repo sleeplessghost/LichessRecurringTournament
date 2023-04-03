@@ -56,7 +56,6 @@ class Tournament:
         self.team_pm_template = team_pm_template
 
     def describe(self) -> str:
-        valid = self.is_valid()
         title = '[bold]{name}[/bold] [italic]{description}[/italic]'
         if not self.is_valid():
             title += ' [red bold]INVALID[/red bold]'
@@ -143,6 +142,16 @@ class Tournament:
         message = message.replace('[link]', f'https://lichess.org/tournament/{created.id}')
         message = message.replace('[br]', '\n')
         return message
+
+    def needs_notification(self):
+        if not self.team_pm_template or not self.team_restriction:
+            return False
+        utc_now = datetime.utcnow()
+        next_date = self.get_next_date()
+        if (next_date - utc_now).days > 0:
+            return False
+        return self.last_notified is None or (next_date - self.last_notified).days > 1
+        
 
 def tournament_json_serializer(obj):
     if isinstance(obj, Tournament):
