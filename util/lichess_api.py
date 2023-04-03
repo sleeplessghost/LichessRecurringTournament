@@ -22,8 +22,9 @@ def teams(api_key: str, username: str) -> List[str]:
 
 def my_tournaments(api_key: str, username: str):
     url = f'{BASE_URL}/user/{username}/tournament/created?status=10'
-    created = rate_limited_get(url, api_key).strip().split('\n')
-    return [parse_created_tournament(json.loads(t)) for t in created]
+    created = rate_limited_get(url, api_key).strip()
+    if len(created) == 0: return []
+    return [parse_created_tournament(json.loads(t)) for t in created.split('\n')]
 
 def create_tournament(api_key: str, tournament: Tournament):
     url = f'{BASE_URL}/tournament'
