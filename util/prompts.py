@@ -80,7 +80,7 @@ def edit_tournament_property_prompt(tournament: Tournament):
     if prop == 'exit':
         return False
     if prop == 'first_date_utc':
-        start_date = typer.prompt('What is the first date and time the tournament should occur (in your local time)? e.g. 2020-12-24 23:59:59.\nDate and time', formats=["%Y-%m-%d %H:%M:%S"], type=datetime)
+        start_date = typer.prompt('What is the first date and time the tournament should occur (in your local time)? e.g. 2020-12-24 23:59:59.\nDate and time', type=datetime, value_proc=lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S"))
         utc_date = start_date.astimezone(timezone.utc)
         tournament.__dict__[prop] = utc_date
     elif prop == 'team_restriction':
