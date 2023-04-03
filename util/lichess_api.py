@@ -89,10 +89,11 @@ def rate_limited_post(url: str, api_key: str, data: dict):
 
 def parse_created_tournament(jsonObj) -> TournamentResponse:
     id = jsonObj['id']
-    name = ' '.join(jsonObj['fullName'].split()[:-1])
+    full_name = jsonObj['fullName']
+    name = ' '.join(full_name.split()[:-1])
     rated = jsonObj['rated']
     increment = jsonObj['clock']['increment']
     starts_at_ms = jsonObj['startsAt']
     variant = jsonObj['variant']['key']
     team = None if 'teamMember' not in jsonObj else jsonObj['teamMember']
-    return TournamentResponse(id, name, rated, increment, starts_at_ms, variant, team)
+    return TournamentResponse(id, name, full_name, rated, increment, starts_at_ms, variant, team)

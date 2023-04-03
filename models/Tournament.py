@@ -135,7 +135,7 @@ class Tournament:
         if not self.team_pm_template or not self.team_restriction:
             return None
         message = self.team_pm_template
-        message = message.replace('[name]', self.name)
+        message = message.replace('[name]', created.full_name)
         message = message.replace('[variant]', self.variant.value)
         message = message.replace('[clocktime]', self.clock_time.value)
         message = message.replace('[clockincrement]', self.clock_increment.value)
@@ -146,7 +146,7 @@ class Tournament:
     def needs_notification(self):
         if not self.team_pm_template or not self.team_restriction:
             return False
-        utc_now = datetime.utcnow()
+        utc_now = datetime.now(timezone.utc)
         next_date = self.get_next_date()
         if (next_date - utc_now).days > 0:
             return False
@@ -174,6 +174,8 @@ def tournament_json_decoder(data):
     for (key, type) in enum_mappings.items():
         data[key] = type(data[key])
     data['first_date_utc'] = datetime.fromisoformat(data['first_date_utc'])
+    if data['last_notified']:
+        data['last_notified'] = datetime.fromisoformat(data['last_notified'])
     return Tournament(**data)
 
 def save_tournaments(tourneys: List[Tournament]):

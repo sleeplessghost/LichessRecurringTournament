@@ -56,7 +56,7 @@ def create():
     tourneys = load_tournaments()
     existing = lichess.my_tournaments(config.api_key, user.username)
     to_create = [t for t in tourneys if t.is_valid() and not t.already_created(existing)]
-    to_create = [t for t in to_create if (t.get_next_date() - datetime.utcnow()).days <= config.num_days]
+    to_create = [t for t in to_create if (t.get_next_date() - datetime.now(timezone.utc)).days <= config.num_days]
     if len(to_create) == 0:
         success('nothing to create')
     else:
@@ -70,7 +70,22 @@ def notify():
     """
     Sends out PMs to teams with tournaments starting in the next 24 hours (requires team and PM template to be set for the tournament)
     """
-    print('notify')
+    config = load_config()
+    user = load_user_info()
+    tourneys = load_tournaments()
+    existing = lichess.my_tournaments(config.api_key, user.username)
+    to_notify = [t for t in tourneys if t.needs_notification() and t.already_created(existing)]
+    if len(to_notify) == 0:
+        success('nothing to notify')
+    else:
+        utc_now = datetime.now(timezone.utc)
+        for tourney in to_notify:
+            tourney_match = next(t for t in existing if tourney.matches(t))
+            message = tourney.get_pm_message(tourney_match)
+            if message:
+                print(message)
+                tourney.last_notified = utc_now
+                save_tournaments(tourneys)
 
 @app.command()
 def new(name: str = prompts.TOURNEY_NAME,
