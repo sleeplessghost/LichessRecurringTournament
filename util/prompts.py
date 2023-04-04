@@ -28,6 +28,7 @@ class AwfulTournamentEnum(StrEnum):
     max_rating = 'max_rating'
     min_games = 'min_games',
     team_pm_template = 'team_pm_template',
+    last_id = 'last_id'
     cancel = 'exit'
 
 # Config
@@ -35,7 +36,7 @@ API_KEY = typer.Option(..., prompt="Enter your Lichess API key")
 NUM_DAYS =  typer.Option(..., prompt="How many days in the future should tournaments be created?")
 
 # Tournament
-TOURNEY_NAME = typer.Option("", prompt="Tournament name? Leave empty to get a random Grandmaster name")
+TOURNEY_NAME = typer.Option("", prompt="Tournament name? Leave empty to get a random Grandmaster name.\nYou can also include [winner] and it will be replaced with the previous tournament winner's name")
 CLOCK_TIME = typer.Option(..., prompt="Initial clock time (in minutes)?")
 CLOCK_INCREMENT = typer.Option(..., prompt="Clock increment (in seconds)?")
 TOURNEY_LENGTH = typer.Option(..., prompt="Tournament length (in minutes)?")
@@ -110,9 +111,12 @@ def edit_tournament_property_prompt(tournament: Tournament):
     else:
         prop_type = type_mappings[prop]
         hint = ''
+        default = None
         if issubclass(prop_type, StrEnum):
             hint = f' ({", ".join([v for v in prop_type])})'
-        value = typer.prompt(f'Set value{hint}', type=type_mappings[prop])
+        if prop_type is str:
+            default = ''
+        value = typer.prompt(f'Set value{hint}', type=type_mappings[prop], default=default)
         tournament.__dict__[prop] = value
     return True
     

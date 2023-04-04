@@ -13,6 +13,7 @@ from models.lichess.TournamentResponse import TournamentResponse
 from models.lichess.Variant import Variant
 import util.constants as constants
 from util.funi import failure, success
+from rich.markup import escape
 
 class Tournament:
     def __init__(self,
@@ -33,8 +34,9 @@ class Tournament:
                  min_rating: RatingRestriction,
                  max_rating: RatingRestriction,
                  min_games: GamesRestriction,
+                 team_pm_template: str,
                  last_notified: datetime,
-                 team_pm_template: str):
+                 last_id: str):
         self.name = name
         self.clock_time = clock_time
         self.clock_increment = clock_increment
@@ -52,14 +54,15 @@ class Tournament:
         self.min_rating = min_rating
         self.max_rating = max_rating
         self.min_games = min_games
-        self.last_notified = last_notified
         self.team_pm_template = team_pm_template
+        self.last_notified = last_notified
+        self.last_id = last_id
 
     def describe(self) -> str:
         title = '[bold]{name}[/bold] [italic]{description}[/italic]'
         if not self.is_valid():
             title += ' [red bold]INVALID[/red bold]'
-        title = title.format(name=self.name, description=f'({self.description})' if self.description else '')
+        title = title.format(name=escape(self.name), description=f'({self.description})' if self.description else '')
         local_timezone = datetime.now().tzinfo
         return '''{title}
     [red]{recurrence}[/red] [yellow]{variant}[/yellow] [blue]{time}[/blue]+[green]{increment}[/green]
@@ -102,14 +105,7 @@ class Tournament:
         return any(self.matches(t) for t in created)
 
     def matches(self, existing: TournamentResponse) -> bool:
-        return (
-            (self.name == '' or self.name == existing.name) and
-            self.rated == existing.rated and
-            self.clock_increment.int_val() == existing.clock_increment and
-            int(self.get_next_date().timestamp() * 1000) == existing.starts_at_ms and
-            self.variant == existing.variant and
-            self.team_restriction == existing.required_team
-        )
+        return self.last_id == existing.id
 
     def is_valid(self, with_output: bool = False):
         # conditions from https://github.com/lichess-org/lila/blob/master/modules/tournament/src/main/TournamentForm.scala
@@ -140,6 +136,10 @@ class Tournament:
             if with_output: failure('[red bold]INVALID[/red bold] Reduce tournament duration, or increase game clock')
             valid = False
         return valid
+
+    def get_name(self, previous_winner: str):
+        winner = previous_winner if previous_winner else ''
+        return self.name.replace('[winner]', winner).replace('  ', ' ')
 
     def get_pm_message(self, created: TournamentResponse):
         if not self.team_pm_template or not self.team_restriction:

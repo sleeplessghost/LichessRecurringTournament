@@ -14,6 +14,7 @@ import util.prompts as prompts
 from models.Config import Config, load_config
 from util.funi import success
 from rich import print
+from rich.markup import escape
 import util.lichess_api as lichess
 
 app = typer.Typer()
@@ -61,9 +62,10 @@ def create():
         success('nothing to create')
     else:
         for tourney in to_create:
-            lichess.create_tournament(config.api_key, tourney)
-            name = tourney.name if tourney.name else 'tournament'
-            success(f'{name} created')
+            created = lichess.create_tournament(config.api_key, tourney)
+            tourney.last_id = created.id
+            save_tournaments(tourneys)
+            success(f'{created.full_name} created')
 
 @app.command()
 def notify():
@@ -113,9 +115,10 @@ def new(name: str = prompts.TOURNEY_NAME,
     pm_template = '' if team_restriction is None else prompts.team_pm_template_prompt(team_restriction)
     date_utc = start_date_time.astimezone(timezone.utc)
     last_notified = None
+    last_id = None
     tournament = Tournament(name, clock_time, clock_increment, tournament_length, recurrence, date_utc,
                             variant, rated, position_FEN, berserkable, streakable, has_chat, description,
-                            team_restriction, min_rating, max_rating, min_games, last_notified, pm_template)
+                            team_restriction, min_rating, max_rating, min_games, pm_template, last_notified, last_id)
     existing = load_tournaments()
     existing.append(tournament)
     save_tournaments(existing)
@@ -136,9 +139,7 @@ def edit():
         while editing:
             print()
             for attribute,value in tourney.__dict__.items():
-                msg = f'{attribute} = {value}'
-                if attribute == 'team_pm_template': typer.echo(msg)
-                else: print(msg)
+                print(escape(f'{attribute} = {value}'))
             tourney.is_valid(with_output=True)
             editing = prompts.edit_tournament_property_prompt(tourney)
             save_tournaments(tourneys)

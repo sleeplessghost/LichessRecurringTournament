@@ -20,13 +20,17 @@ def teams(api_key: str, username: str) -> List[str]:
     teams_data = json.loads(rate_limited_get(url, api_key))
     return [team['id'] for team in teams_data if is_leader(username, team)]
 
-def my_tournaments(api_key: str, username: str):
+def my_tournaments(api_key: str, username: str) -> List[TournamentResponse]:
     url = f'{BASE_URL}/api/user/{username}/tournament/created?status=10'
     created = rate_limited_get(url, api_key).strip()
     if len(created) == 0: return []
     return [parse_created_tournament(json.loads(t)) for t in created.split('\n')]
 
-def create_tournament(api_key: str, tournament: Tournament):
+def create_tournament(api_key: str, tournament: Tournament) -> TournamentResponse:
+    name = tournament.get_name('')
+    if tournament.last_id and '[winner]' in tournament.name:
+        prev_winner = tournament_winner(api_key, tournament.last_id)
+        name = tournament.get_name(prev_winner)
     url = f'{BASE_URL}/api/tournament'
     data = {
         'clockTime' : tournament.clock_time.float_val(),
@@ -40,8 +44,8 @@ def create_tournament(api_key: str, tournament: Tournament):
         'hasChat': tournament.has_chat,
         'description': tournament.description,
     }
-    if len(tournament.name):
-        data['name'] = tournament.name
+    if len(name):
+        data['name'] = name
     if tournament.variant == Variant.FROM_POSITION:
         data['position'] = tournament.positionFEN
     if tournament.has_restrictions():
@@ -54,17 +58,25 @@ def create_tournament(api_key: str, tournament: Tournament):
             conditions['nbRatedGame.nb'] = tournament.min_games.int_val()
         if tournament.team_restriction != None:
             conditions['teamMember.teamId'] = tournament.team_restriction
-    rate_limited_post(url, api_key, data)
+    response = rate_limited_post(url, api_key, data)
+    return parse_created_tournament(json.loads(response))
 
 def pm_team(api_key: str, team_id: str, message: str):
     url = f'{BASE_URL}/team/{team_id}/pm-all'
     data = {'message': message}
     rate_limited_post(url, api_key, data)
 
-def auth_header(api_key: str):
+def tournament_winner(api_key: str, tournament_id: str) -> str:
+    if tournament_id is None: return ''
+    url = f'{BASE_URL}/api/tournament/{tournament_id}/results?nb=1'
+    results = rate_limited_get(url, api_key).strip()
+    if len(results) == 0: return ''
+    return json.loads(results)['username']
+
+def auth_header(api_key: str) -> dict:
     return {'Authorization': f'Bearer {api_key}'}
 
-def rate_limited_get(url: str, api_key: str):
+def rate_limited_get(url: str, api_key: str) -> str:
     response = requests.get(url, headers=auth_header(api_key))
     if response.ok:
         return response.text
@@ -78,7 +90,7 @@ def rate_limited_get(url: str, api_key: str):
         failure(message)
         quit()
 
-def rate_limited_post(url: str, api_key: str, data: dict):
+def rate_limited_post(url: str, api_key: str, data: dict) -> str:
     response = requests.post(url, headers=auth_header(api_key), json=data)
     if response.ok:
         return response.text
@@ -95,14 +107,7 @@ def rate_limited_post(url: str, api_key: str, data: dict):
 def parse_created_tournament(jsonObj) -> TournamentResponse:
     id = jsonObj['id']
     full_name = jsonObj['fullName']
-    # full name is '[Tournament Name] Arena' (or Swiss), strip the tournament type so it can be matched to configured name
-    name = ' '.join(full_name.split()[:-1])
-    rated = jsonObj['rated']
-    increment = jsonObj['clock']['increment']
-    starts_at_ms = jsonObj['startsAt']
-    variant = jsonObj['variant']['key']
-    team = None if 'teamMember' not in jsonObj else jsonObj['teamMember']
-    return TournamentResponse(id, name, full_name, rated, increment, starts_at_ms, variant, team)
+    return TournamentResponse(id, full_name)
 
 def is_leader(username: str, teamJson) -> bool:
     leaders = [leaderJson['name'] for leaderJson in teamJson['leaders']]
