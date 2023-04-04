@@ -80,4 +80,4 @@ And using `Task Scheduler` to run this batch file automatically on a schedule e.
 
 Or other schedules like daily at a specific time, or weekly on a specific day.
 
-You should be able to do something similar in unix with cron jobs.
+You should be able to do something similar in unix with a cron job.
