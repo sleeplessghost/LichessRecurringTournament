@@ -29,7 +29,7 @@ def setup(api_key: str = prompts.API_KEY, num_days: int = prompts.NUM_DAYS):
 @app.command()
 def refresh():
     """
-    Refresh lichess information (teams you can access)
+    Refresh lichess information (your username and teams you lead)
     """
     config = load_config()
     username = lichess.username(config.api_key)
@@ -145,11 +145,11 @@ def edit():
             success()
 
 @app.command()
-def delete(delete_all: bool = False, invalid: bool = False):
+def delete(all: bool = False, invalid: bool = False):
     """
-    Deletes a configured tournament
+    Deletes a configured tournament (only the saved configuration, to cancel tournaments go on https://lichess.org)
     """
-    if delete_all:
+    if all:
         save_tournaments([])
         success('all gone')
     elif invalid:

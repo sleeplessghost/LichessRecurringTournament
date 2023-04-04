@@ -127,6 +127,10 @@ class Tournament:
             if self.clock_increment.int_val() > (clock_time_seconds * 2):
                 if with_output: failure('[red bold]INVALID[/red bold] Berserkable requires increment to be <= 2 * clock time (in seconds)')
                 valid = False
+        if self.min_rating != RatingRestriction.NONE and self.max_rating != RatingRestriction.NONE:
+            if self.min_rating.int_val() >= self.max_rating.int_val():
+                if with_output: failure('[red bold]INVALID[/red bold] Min rating should be less than max rating')
+                valid = False
         estimated_game_seconds = (60 * self.clock_time.float_val() + 30 * self.clock_increment.int_val()) * 2 * 0.8 + 15
         estimated_number_of_games = (self.length_mins.int_val() * 60) / estimated_game_seconds
         if estimated_number_of_games < 3:
