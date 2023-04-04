@@ -18,7 +18,7 @@ Run `py litourney.py setup` and you will be asked to input:
 
 You can generate a personal access token here: https://lichess.org/account/oauth/token
 
-The token should have `tournament.write`, `team.read`, and `team.lead` permissions.
+The token should have `tournament:write`, `team:read`, and `team:lead` permissions ([pre-filled create token link](https://lichess.org/account/oauth/token/create?scopes[]=tournament:write&scopes[]=team:read&scopes[]=team:lead&description=Lichess+Recurring+Tournament+tool)).
 
 ![team](https://user-images.githubusercontent.com/25903992/229781768-439d8065-7e9b-41e6-b9fb-d2321cba4bd7.PNG)
 
