@@ -32,7 +32,7 @@ class AwfulTournamentEnum(StrEnum):
     cancel = 'exit'
 
 # Config
-API_KEY = typer.Option(..., prompt="Enter your Lichess API key")
+API_KEY = typer.Option(..., prompt="Enter your Lichess API personal access token")
 NUM_DAYS =  typer.Option(..., prompt="How many days in the future should tournaments be created?")
 
 # Tournament

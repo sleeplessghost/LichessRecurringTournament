@@ -40,14 +40,6 @@ def refresh():
     success(f'username: {user.username}, teams: {user.teams}')
 
 @app.command()
-def list():
-    """
-    Lists configured tournaments
-    """
-    tourneys = load_tournaments()
-    print_tourneys(tourneys)
-
-@app.command()
 def create():
     """
     Creates configured tournaments within the next X days (from config file)
@@ -144,6 +136,14 @@ def edit():
             editing = prompts.edit_tournament_property_prompt(tourney)
             save_tournaments(tourneys)
             success()
+
+@app.command()
+def list():
+    """
+    Lists configured tournaments
+    """
+    tourneys = load_tournaments()
+    print_tourneys(tourneys)
 
 @app.command()
 def delete(all: bool = False, invalid: bool = False):
