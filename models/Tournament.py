@@ -139,7 +139,7 @@ class Tournament:
 
     def get_name(self, previous_winner: str):
         winner = previous_winner if previous_winner else ''
-        return self.name.replace('[winner]', winner).replace('  ', ' ')
+        return self.name.replace('[winner]', winner).replace('  ', ' ').strip()
 
     def get_pm_message(self, created: TournamentResponse):
         if not self.team_pm_template or not self.team_restriction:
