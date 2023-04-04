@@ -91,6 +91,7 @@ Template"""
     return typer.prompt(prompt_msg, type=str, default="", show_choices=False)
 
 def edit_tournament_property_prompt(tournament: Tournament):
+    # awful
     type_mappings = {prop: type(tournament.__dict__[(prop)]) for prop in AwfulTournamentEnum if prop != 'exit'}
     prop = typer.prompt(f'Edit which property? (or exit)', type=AwfulTournamentEnum)
     if prop == 'exit':
