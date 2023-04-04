@@ -69,7 +69,7 @@ This will find all configured tournaments that have already been created which w
 - A PM will only be sent for a particular tournament a single time, running the `notify` command again won't resend it until the next time the tournament reccurs.
 
 ## Automation
-After you have configured your tournaments, you may want to automate the creation and PMs so you don't need to manually run it each week. A simple way to do this in windows would be to make a batch file (`.bat`) as below:
+After you have configured your tournaments, you may want to automate the creation and PM notifications so you don't need to manually run it each week. A simple way to do this in windows would be to make a batch file (`.bat`) as below:
 ```
 py litourney.py create
 py litourney.py notify
