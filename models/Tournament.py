@@ -111,6 +111,8 @@ class Tournament:
     def is_valid(self, with_output: bool = False):
         # conditions from https://github.com/lichess-org/lila/blob/master/modules/tournament/src/main/TournamentForm.scala
         valid = True
+        if self.name and len(self.name) > 30:
+            if with_output: failure('[red bold]INVALID[/red bold] Name should be 30 characters or less')
         if self.clock_time.float_val() + self.clock_increment.int_val() == 0:
             if with_output: failure('[red bold]INVALID[/red bold] Clock time and increment must add to more than 0')
             valid = False
