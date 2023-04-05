@@ -1,6 +1,7 @@
 import json
 from typing import List
 import requests
+from models.Templating import NameReplacement
 from models.Tournament import Tournament
 from models.lichess.GamesRestriction import GamesRestriction
 from models.lichess.RatingRestriction import RatingRestriction
@@ -28,7 +29,7 @@ def my_tournaments(api_key: str, username: str) -> List[TournamentResponse]:
 
 def create_tournament(api_key: str, tournament: Tournament) -> TournamentResponse:
     name = tournament.get_name('')
-    if tournament.last_id and '[winner]' in tournament.name:
+    if tournament.last_id and NameReplacement.WINNER.value in tournament.name:
         prev_winner = tournament_winner(api_key, tournament.last_id)
         name = tournament.get_name(prev_winner)
     url = f'{BASE_URL}/api/tournament'

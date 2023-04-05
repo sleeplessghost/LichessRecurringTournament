@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from enum import StrEnum
 from typing import List
 import typer
+from models.Templating import NameReplacement, TemplateReplacement
 from models.Tournament import Tournament
 from models.UserInfo import load_user_info
 from models.lichess.ClockIncrement import ClockIncrement
@@ -36,7 +37,7 @@ API_KEY = typer.Option(..., prompt="Enter your Lichess API personal access token
 NUM_DAYS =  typer.Option(..., prompt="How many days in the future should tournaments be created?")
 
 # Tournament
-TOURNEY_NAME = typer.Option("", prompt="Tournament name? Leave empty to get a random Grandmaster name.\nYou can also include [winner] and it will be replaced with the previous tournament winner's name")
+TOURNEY_NAME = typer.Option("", prompt=f"Tournament name? Leave empty to get a random Grandmaster name.\nYou can also include {NameReplacement.WINNER.value} and it will be replaced with the previous tournament winner's name.\nShould not be longer than 30 characters")
 CLOCK_TIME = typer.Option(..., prompt="Initial clock time (in minutes)?")
 CLOCK_INCREMENT = typer.Option(..., prompt="Clock increment (in seconds)?")
 TOURNEY_LENGTH = typer.Option(..., prompt="Tournament length (in minutes)?")
@@ -79,14 +80,14 @@ def team_restrictions_prompt(teams: List[str]):
 def team_pm_template_prompt(team_id: str):
     if team_id is None:
         return ''
-    prompt_msg = """Do you want to send a 24 hour pre-tournament PM reminder to the team? If so, enter a template to be used for the PM.
+    prompt_msg = f"""Do you want to send a 24 hour pre-tournament PM reminder to the team? If so, enter a template to be used for the PM.
 Special values which will be automatically replaced (including square brackets):
-    [name] : Tournament name
-    [variant] : Variant used for the tournament
-    [clocktime] : Initial clock time
-    [clockincrement] : Clock increment
-    [link] : Link to the tournament
-    [br] : Line break
+    {TemplateReplacement.NAME.value} : Tournament name
+    {TemplateReplacement.VARIANT.value} : Variant used for the tournament
+    {TemplateReplacement.CLOCKTIME.value} : Initial clock time
+    {TemplateReplacement.INCREMENT.value} : Clock increment
+    {TemplateReplacement.LINK.value} : Link to the tournament
+    {TemplateReplacement.BREAK.value} : Line break
 If you don't want to send a PM reminder, you can leave this blank.
 Template"""
     return typer.prompt(prompt_msg, type=str, default="", show_choices=False)

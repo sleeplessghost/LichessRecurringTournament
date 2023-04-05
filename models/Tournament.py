@@ -3,6 +3,7 @@ import json
 import os
 from typing import List
 import typer
+from models.Templating import NameReplacement, TemplateReplacement
 from models.RecurrenceType import RecurrenceType
 from models.lichess.ClockTime import ClockTime
 from models.lichess.ClockIncrement import ClockIncrement
@@ -139,18 +140,18 @@ class Tournament:
 
     def get_name(self, previous_winner: str):
         winner = previous_winner if previous_winner else ''
-        return self.name.replace('[winner]', winner).replace('  ', ' ').strip()
+        return self.name.replace(NameReplacement.WINNER.value, winner).replace('  ', ' ').strip()
 
     def get_pm_message(self, created: TournamentResponse):
         if not self.team_pm_template or not self.team_restriction:
             return None
         message = self.team_pm_template
-        message = message.replace('[name]', created.full_name)
-        message = message.replace('[variant]', self.variant.value)
-        message = message.replace('[clocktime]', self.clock_time.value)
-        message = message.replace('[clockincrement]', self.clock_increment.value)
-        message = message.replace('[link]', f'https://lichess.org/tournament/{created.id}')
-        message = message.replace('[br]', '\n')
+        message = message.replace(TemplateReplacement.NAME.value, created.full_name)
+        message = message.replace(TemplateReplacement.VARIANT.value, self.variant.value)
+        message = message.replace(TemplateReplacement.CLOCKTIME.value, self.clock_time.value)
+        message = message.replace(TemplateReplacement.INCREMENT.value, self.clock_increment.value)
+        message = message.replace(TemplateReplacement.LINK.value, f'https://lichess.org/tournament/{created.id}')
+        message = message.replace(TemplateReplacement.BREAK.value, '\n')
         return message
 
     def needs_notification(self):
