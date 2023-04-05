@@ -145,12 +145,12 @@ class Tournament:
         name = self.name.replace(NameReplacement.WINNER.value, winner).replace('  ', ' ').strip()
         if len(name) > 30:
             without_winner = self.name.replace(NameReplacement.WINNER.value, '').replace('  ', ' ').strip()
-            digits_removed = ''.join([c for c in previous_winner if not c.isdigit()])
-            name = self.name.replace(NameReplacement.WINNER.value, digits_removed).replace('  ', ' ').strip()
+            alpha_chars = ''.join([c for c in previous_winner if c.isalpha()])
+            name = self.name.replace(NameReplacement.WINNER.value, alpha_chars).replace('  ', ' ').strip()
             if len(name) > 30:
-                diff = 30 - len(without_winner)
-                sub = digits_removed[:diff-1]
-                if len(sub) / len(digits_removed) > 0.5:
+                diff = 30 - len(without_winner) - 1
+                sub = alpha_chars[:diff]
+                if len(sub) / len(alpha_chars) > 0.5:
                     return self.name.replace(NameReplacement.WINNER.value, sub).replace('  ', ' ').strip()
                 else:
                     return without_winner
