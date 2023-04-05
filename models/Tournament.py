@@ -142,7 +142,19 @@ class Tournament:
 
     def get_name(self, previous_winner: str):
         winner = previous_winner if previous_winner else ''
-        return self.name.replace(NameReplacement.WINNER.value, winner).replace('  ', ' ').strip()
+        name = self.name.replace(NameReplacement.WINNER.value, winner).replace('  ', ' ').strip()
+        if len(name) > 30:
+            without_winner = self.name.replace(NameReplacement.WINNER.value, '').replace('  ', ' ').strip()
+            digits_removed = ''.join([c for c in previous_winner if not c.isdigit()])
+            name = self.name.replace(NameReplacement.WINNER.value, digits_removed).replace('  ', ' ').strip()
+            if len(name) > 30:
+                diff = 30 - len(without_winner)
+                sub = digits_removed[:diff-1]
+                if len(sub) / len(digits_removed) > 0.5:
+                    return self.name.replace(NameReplacement.WINNER.value, sub).replace('  ', ' ').strip()
+                else:
+                    return without_winner
+        return name
 
     def get_pm_message(self, created: TournamentResponse):
         if not self.team_pm_template or not self.team_restriction:
