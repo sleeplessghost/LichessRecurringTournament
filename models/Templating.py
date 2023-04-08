@@ -10,4 +10,4 @@ class TemplateReplacement(StrEnum):
     INCREMENT = '[clockincrement]'
     LINK = '[link]'
     BREAK = '[br]'
-    TIMEZONE = '\[timezone:\S+\]' #regex match, used like [timezone:Europe/London]
+    TIMEZONE = '\[timezone:[^\]]+\]' #regex match, used like [timezone:Europe/London]
