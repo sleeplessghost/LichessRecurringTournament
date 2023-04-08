@@ -87,9 +87,11 @@ class Tournament:
         elif self.recurrence == RecurrenceType.WEEKLY or self.recurrence == RecurrenceType.FORTNIGHTLY:
             original_weekday = self.first_date_utc.weekday()
             next_weekday = next_date.weekday()
-            if next_date < utc_now or next_weekday != original_weekday:
+            if next_weekday != original_weekday:
                 days = (original_weekday - next_weekday) % 7
                 next_date += timedelta(days=days)
+            if next_date < utc_now:
+                next_date += timedelta(days=7)
             if self.recurrence == RecurrenceType.FORTNIGHTLY:
                 weeks_between = (next_date - self.first_date_utc).days // 7
                 if weeks_between % 2 != 0:
