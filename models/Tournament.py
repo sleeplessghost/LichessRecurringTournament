@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta, timezone
 import json
 import os
+import re
 from typing import List
+from zoneinfo import ZoneInfo
 import typer
 from models.Templating import NameReplacement, TemplateReplacement
 from models.RecurrenceType import RecurrenceType
@@ -166,6 +168,13 @@ class Tournament:
         message = message.replace(TemplateReplacement.INCREMENT.value, self.clock_increment.value)
         message = message.replace(TemplateReplacement.LINK.value, f'https://lichess.org/tournament/{created.id}')
         message = message.replace(TemplateReplacement.BREAK.value, '\n')
+        matches = re.findall(TemplateReplacement.TIMEZONE.value, message)
+        starts_at = self.get_next_date()
+        for tzmatch in matches:
+            tz = ZoneInfo(tzmatch.replace('[timezone:', '').replace(']', ''))
+            print(starts_at.astimezone(tz).tzname())
+            localized = starts_at.astimezone(tz).strftime('%Y-%m-%d %H:%M:%S (%Z)')
+            message = message.replace(tzmatch, localized)
         return message
 
     def needs_notification(self):

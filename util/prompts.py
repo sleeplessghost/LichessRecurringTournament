@@ -88,6 +88,7 @@ Special values which will be automatically replaced (including square brackets):
     {TemplateReplacement.INCREMENT.value} : Clock increment
     {TemplateReplacement.LINK.value} : Link to the tournament
     {TemplateReplacement.BREAK.value} : Line break
+    [timezone:Europe/London] : Show the start date/time for the tournament in the specified timezone https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 If you don't want to send a PM reminder, you can leave this blank.
 Template"""
     return typer.prompt(prompt_msg, type=str, default="", show_choices=False)
