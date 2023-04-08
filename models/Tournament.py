@@ -3,7 +3,7 @@ import json
 import os
 import re
 from typing import List
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 import typer
 from models.Templating import NameReplacement, TemplateReplacement
 from models.RecurrenceType import RecurrenceType
@@ -140,6 +140,14 @@ class Tournament:
         if estimated_number_of_games > 150:
             if with_output: failure('[red bold]INVALID[/red bold] Reduce tournament duration, or increase game clock')
             valid = False
+        if self.team_pm_template and len(self.team_pm_template):
+            matches = re.findall(TemplateReplacement.TIMEZONE.value, self.team_pm_template)
+            for tzmatch in matches:
+                try:
+                    ZoneInfo(tzmatch.replace('[timezone:', '').replace(']', ''))
+                except ZoneInfoNotFoundError:
+                    if with_output: failure(f'[red bold]INVALID[/red bold] Invalid timezone: {escape(tzmatch)}')
+                    valid = False
         return valid
 
     def get_name(self, previous_winner: str):
@@ -172,7 +180,6 @@ class Tournament:
         starts_at = self.get_next_date()
         for tzmatch in matches:
             tz = ZoneInfo(tzmatch.replace('[timezone:', '').replace(']', ''))
-            print(starts_at.astimezone(tz).tzname())
             localized = starts_at.astimezone(tz).strftime('%Y-%m-%d %H:%M:%S (%Z)')
             message = message.replace(tzmatch, localized)
         return message
