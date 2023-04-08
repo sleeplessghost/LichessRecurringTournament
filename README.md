@@ -51,6 +51,7 @@ Note if using this: be cautious of the number of days in advance you are creatin
 - `[clockincrement]` : increment in seconds (e.g. for blitz `5+3`, this would return `3`)
 - `[link]` : a link to the tournament
 - `[br]` : a newline character
+- `[timezone:Europe/London]` : the start date/time of the tournament in the specified timezone. A list of TZ identifiers can be found here: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
 ## Tournament creation
 To create your configured tournaments within the next X days (from your initial setup config):
