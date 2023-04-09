@@ -8,8 +8,9 @@ Uses the lichess API to create recurring tournaments. You can configure a tourna
 
 ### Libraries
 Included in `requirements.txt`. Can install together with `pip install -r requirements.txt`, or individually as below:
-- [typer](https://typer.tiangolo.com/) `pip install typer[all]`
+- [typer](https://typer.tiangolo.com) `pip install typer[all]`
 - [requests](https://requests.readthedocs.io) `pip install requests`
+- [tzdata](https://tzdata.readthedocs.io) `pip install tzdata`
 
 ## Initial setup
 Run `py litourney.py setup` and you will be asked to input:
