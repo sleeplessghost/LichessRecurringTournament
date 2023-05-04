@@ -117,6 +117,11 @@ class Tournament:
         valid = True
         if self.name and len(self.name) > 30:
             if with_output: failure('[red bold]INVALID[/red bold] Name should be 30 characters or less')
+            valid = False
+        name_without_winner = self.name.replace(NameReplacement.WINNER.value, '')
+        if any(c != ' ' and not c.isalnum() for c in name_without_winner):
+            if with_output: failure('[red bold]INVALID[/red bold] Name should only have spaces or alphanumeric characters')
+            valid = False
         if self.clock_time.float_val() + self.clock_increment.int_val() == 0:
             if with_output: failure('[red bold]INVALID[/red bold] Clock time and increment must add to more than 0')
             valid = False
@@ -153,7 +158,7 @@ class Tournament:
         return valid
 
     def get_name(self, previous_winner: str):
-        winner = previous_winner if previous_winner else ''
+        winner = '' if not previous_winner else ''.join([c for c in previous_winner if c.isalnum()])
         name = self.name.replace(NameReplacement.WINNER.value, winner).replace('  ', ' ').strip()
         if len(name) > 30:
             without_winner = self.name.replace(NameReplacement.WINNER.value, '').replace('  ', ' ').strip()
