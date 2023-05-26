@@ -3,6 +3,7 @@ from typing import List
 import requests
 from models.Templating import NameReplacement
 from models.Tournament import Tournament
+from models.TournamentType import TournamentType
 from models.lichess.GamesRestriction import GamesRestriction
 from models.lichess.RatingRestriction import RatingRestriction
 from models.lichess.TournamentResponse import TournamentResponse
@@ -28,11 +29,12 @@ def my_tournaments(api_key: str, username: str) -> List[TournamentResponse]:
     return [parse_created_tournament(json.loads(t)) for t in created.split('\n')]
 
 def create_tournament(api_key: str, tournament: Tournament) -> TournamentResponse:
+    teams = tournament.team_restriction.split(',')
+    url = get_new_tournament_url(tournament.type, teams[0])
     name = tournament.get_name('')
     if tournament.last_id and NameReplacement.WINNER.value in tournament.name:
         prev_winner = tournament_winner(api_key, tournament.last_id)
         name = tournament.get_name(prev_winner)
-    url = f'{BASE_URL}/api/tournament'
     data = {
         'clockTime' : tournament.clock_time.float_val(),
         'clockIncrement': tournament.clock_increment.int_val(),
@@ -57,10 +59,25 @@ def create_tournament(api_key: str, tournament: Tournament) -> TournamentRespons
             conditions['maxRating.rating'] = tournament.max_rating.int_val()
         if tournament.min_games != GamesRestriction.NONE:
             conditions['nbRatedGame.nb'] = tournament.min_games.int_val()
-        if tournament.team_restriction != None:
+        if tournament.team_restriction != None and tournament.type == TournamentType.Arena:
             conditions['teamMember.teamId'] = tournament.team_restriction
-    response = rate_limited_post(url, api_key, data)
-    return parse_created_tournament(json.loads(response))
+    if tournament.type == TournamentType.TeamBattle:
+        data['teamBattleByTeam'] = tournament.team_restriction.split(',')[0]
+        response = rate_limited_post(url, api_key, data)
+        tournament_id = json.loads(response)['id']
+        update_team_tournament(api_key, tournament_id, teams, tournament.num_leaders)
+        return parse_created_tournament(json.loads(response))
+    else:
+        response = rate_limited_post(url, api_key, data)
+        return parse_created_tournament(json.loads(response))
+
+def update_team_tournament(api_key: str, tournament_id: str, teams: List[str], num_leaders: int):
+    url = f'{BASE_URL}/api/tournament/team-battle/{tournament_id}'
+    data = {
+        'teams': ','.join(teams),
+        'nbLeaders': num_leaders
+    }
+    rate_limited_post(url, api_key, data)
 
 def pm_team(api_key: str, team_id: str, message: str):
     url = f'{BASE_URL}/team/{team_id}/pm-all'
@@ -113,3 +130,8 @@ def parse_created_tournament(jsonObj) -> TournamentResponse:
 def is_leader(username: str, teamJson) -> bool:
     leaders = [leaderJson['name'] for leaderJson in teamJson['leaders']]
     return username in leaders
+
+def get_new_tournament_url(type: TournamentType, team_id: str):
+    match type:
+        case TournamentType.Arena | TournamentType.TeamBattle: return f'{BASE_URL}/api/tournament'
+        case TournamentType.Swiss: return f'{BASE_URL}/api/swiss/new/{team_id}'

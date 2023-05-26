@@ -7,6 +7,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 import typer
 from models.Templating import NameReplacement, TemplateReplacement
 from models.RecurrenceType import RecurrenceType
+from models.TournamentType import TournamentType
 from models.lichess.ClockTime import ClockTime
 from models.lichess.ClockIncrement import ClockIncrement
 from models.lichess.GamesRestriction import GamesRestriction
@@ -20,6 +21,7 @@ from rich.markup import escape
 
 class Tournament:
     def __init__(self,
+                 type: TournamentType,
                  name: str,
                  clock_time: ClockTime,
                  clock_increment: ClockIncrement,
@@ -39,7 +41,9 @@ class Tournament:
                  min_games: GamesRestriction,
                  team_pm_template: str,
                  last_notified: datetime,
-                 last_id: str):
+                 last_id: str,
+                 num_leaders: int):
+        self.type = type
         self.name = name
         self.clock_time = clock_time
         self.clock_increment = clock_increment
@@ -60,12 +64,13 @@ class Tournament:
         self.team_pm_template = team_pm_template
         self.last_notified = last_notified
         self.last_id = last_id
+        self.num_leaders = num_leaders
 
     def describe(self) -> str:
-        title = '[bold]{name}[/bold] [italic]{description}[/italic]'
+        title = '[bold]{name}[/bold] ({type}) [italic]{description}[/italic]'
         if not self.is_valid():
             title += ' [red bold]INVALID[/red bold]'
-        title = title.format(name=escape(self.name), description=f'({self.description})' if self.description else '')
+        title = title.format(name=escape(self.name), type=self.type.value, description=f'({self.description})' if self.description else '')
         local_timezone = datetime.now().tzinfo
         return '''{title}
     [red]{recurrence}[/red] [yellow]{variant}[/yellow] [blue]{time}[/blue]+[green]{increment}[/green]
@@ -104,7 +109,7 @@ class Tournament:
         return next_date
 
     def has_restrictions(self) -> bool:
-        return self.team_restriction is not None or self.min_rating != RatingRestriction.NONE or self.max_rating != RatingRestriction.NONE or self.min_games != GamesRestriction.NONE
+        return (self.team_restriction is not None and self.type != TournamentType.TeamBattle) or self.min_rating != RatingRestriction.NONE or self.max_rating != RatingRestriction.NONE or self.min_games != GamesRestriction.NONE
 
     def already_created(self, created: List[TournamentResponse]) -> bool:
         return any(self.matches(t) for t in created)
@@ -155,6 +160,12 @@ class Tournament:
                 except ZoneInfoNotFoundError:
                     if with_output: failure(f'[red bold]INVALID[/red bold] Invalid timezone: {escape(tzmatch)}')
                     valid = False
+        if self.type == TournamentType.Swiss and self.team_restriction is None:
+            if with_output: failure('[red bold]INVALID[/red bold] Swiss tournaments must be restricted to a team')
+            valid = False
+        if self.type == TournamentType.TeamBattle and (self.team_restriction is None or len(self.team_restriction.split(',')) <= 1):
+            if with_output: failure('[red bold]INVALID[/red bold] Team battles must have at least 2 teams')
+            valid = False
         return valid
 
     def get_name(self, previous_winner: str):
@@ -210,6 +221,7 @@ def tournament_json_serializer(obj):
 
 def tournament_json_decoder(data):
     enum_mappings = {
+        'type': TournamentType,
         'clock_time': ClockTime,
         'clock_increment': ClockIncrement,
         'length_mins': TournamentLength,

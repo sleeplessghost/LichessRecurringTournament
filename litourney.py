@@ -3,6 +3,7 @@ from typing import List
 import typer
 from models.RecurrenceType import RecurrenceType
 from models.Tournament import Tournament, load_tournaments, save_tournaments
+from models.TournamentType import TournamentType
 from models.UserInfo import UserInfo, load_user_info
 from models.lichess.ClockIncrement import ClockIncrement
 from models.lichess.ClockTime import ClockTime
@@ -83,7 +84,8 @@ def notify():
                 success(f'{tourney.team_restriction} notified for {tourney_match.full_name}')
 
 @app.command()
-def new(name: str = prompts.TOURNEY_NAME,
+def new(type: TournamentType = prompts.TOURNEY_TYPE,
+        name: str = prompts.TOURNEY_NAME,
         description: str = prompts.DESCRIPTION,
         recurrence: RecurrenceType = prompts.RECURRENCE_TYPE,
         start_date_time: datetime = prompts.START_DATE_TIME,
@@ -103,14 +105,20 @@ def new(name: str = prompts.TOURNEY_NAME,
     berserkable = prompts.berserkable_prompt(clock_time, clock_increment)
     position_FEN = prompts.position_fen_prompt(variant)
     user_info = load_user_info()
-    team_restriction = prompts.team_restrictions_prompt(user_info.teams)
+    team_restriction = None
+    num_leaders = 0
+    if type == TournamentType.TeamBattle:
+        team_restriction = ','.join(prompts.team_battle_teams_prompt(user_info.teams))
+        num_leaders = prompts.num_leaders_prompt(type)
+    else:
+        team_restriction = prompts.team_restrictions_prompt(user_info.teams)
     pm_template = '' if team_restriction is None else prompts.team_pm_template_prompt(team_restriction)
     date_utc = start_date_time.astimezone(timezone.utc)
     last_notified = None
     last_id = None
-    tournament = Tournament(name, clock_time, clock_increment, tournament_length, recurrence, date_utc,
+    tournament = Tournament(type, name, clock_time, clock_increment, tournament_length, recurrence, date_utc,
                             variant, rated, position_FEN, berserkable, streakable, has_chat, description,
-                            team_restriction, min_rating, max_rating, min_games, pm_template, last_notified, last_id)
+                            team_restriction, min_rating, max_rating, min_games, pm_template, last_notified, last_id, num_leaders)
     existing = load_tournaments()
     existing.append(tournament)
     save_tournaments(existing)
