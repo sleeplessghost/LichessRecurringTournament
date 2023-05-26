@@ -163,9 +163,13 @@ class Tournament:
         if self.type == TournamentType.Swiss and self.team_restriction is None:
             if with_output: failure('[red bold]INVALID[/red bold] Swiss tournaments must be restricted to a team')
             valid = False
-        if self.type == TournamentType.TeamBattle and (self.team_restriction is None or len(self.team_restriction.split(',')) <= 1):
-            if with_output: failure('[red bold]INVALID[/red bold] Team battles must have at least 2 teams')
-            valid = False
+        if self.type == TournamentType.TeamBattle:
+            if self.team_restriction is None or len(self.team_restriction.split(',')) <= 1:
+                if with_output: failure('[red bold]INVALID[/red bold] Team battles must have at least 2 teams')
+                valid = False
+            if self.num_leaders <= 0:
+                if with_output: failure('[red bold]INVALID[/red bold] Team battles must have at least 1 leader per team')
+                valid = False
         return valid
 
     def get_name(self, previous_winner: str):
