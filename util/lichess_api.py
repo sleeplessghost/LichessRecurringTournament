@@ -87,8 +87,8 @@ def pm_team(api_key: str, team_id: str, message: str):
 def tournament_winner(api_key: str, tournament_id: str) -> str:
     if tournament_id is None: return ''
     url = f'{BASE_URL}/api/tournament/{tournament_id}/results?nb=1'
-    results = rate_limited_get(url, api_key).strip()
-    if len(results) == 0: return ''
+    results = rate_limited_try_get(url, api_key)
+    if results is None or len(results.strip()) == 0: return ''
     return json.loads(results)['username']
 
 def auth_header(api_key: str) -> dict:
@@ -107,6 +107,17 @@ def rate_limited_get(url: str, api_key: str) -> str:
         if response.status_code == 401: message = '401 Unauthorized - have you run setup with the correct API key?'
         failure(message)
         quit()
+
+def rate_limited_try_get(url: str, api_key: str) -> str:
+    response = requests.get(url, headers=auth_header(api_key))
+    if response.ok:
+        return response.text
+    elif response.status_code == 429:
+        failure('Request was rate limited, waiting for 1 min to retry')
+        wait(60)
+        return rate_limited_try_get(url, api_key)
+    else:
+        return None
 
 def rate_limited_post(url: str, api_key: str, data: dict) -> str:
     response = requests.post(url, headers=auth_header(api_key), json=data)
