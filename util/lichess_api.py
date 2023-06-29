@@ -91,11 +91,11 @@ def tournament_winner(api_key: str, tournament_id: str) -> str:
     if results is None or len(results.strip()) == 0: return ''
     return json.loads(results)['username']
 
-def auth_header(api_key: str) -> dict:
-    return {'Authorization': f'Bearer {api_key}'}
+def get_headers(api_key: str) -> dict:
+    return {'Authorization': f'Bearer {api_key}', 'Accept': 'application/json'}
 
 def rate_limited_get(url: str, api_key: str) -> str:
-    response = requests.get(url, headers=auth_header(api_key))
+    response = requests.get(url, headers=get_headers(api_key))
     if response.ok:
         return response.text
     elif response.status_code == 429:
@@ -109,7 +109,7 @@ def rate_limited_get(url: str, api_key: str) -> str:
         quit()
 
 def rate_limited_try_get(url: str, api_key: str) -> str:
-    response = requests.get(url, headers=auth_header(api_key))
+    response = requests.get(url, headers=get_headers(api_key))
     if response.ok:
         return response.text
     elif response.status_code == 429:
@@ -120,7 +120,7 @@ def rate_limited_try_get(url: str, api_key: str) -> str:
         return None
 
 def rate_limited_post(url: str, api_key: str, data: dict) -> str:
-    response = requests.post(url, headers=auth_header(api_key), json=data)
+    response = requests.post(url, headers=get_headers(api_key), json=data)
     if response.ok:
         return response.text
     elif response.status_code == 429:
