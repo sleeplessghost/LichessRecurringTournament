@@ -9,7 +9,7 @@ class Config:
 
     def save(self):
         with open(constants.CONFIG_FILENAME, 'w') as configFile:
-            configFile.write(json.dumps(self.__dict__))
+            configFile.write(json.dumps(self.__dict__, indent=4))
 
 def load_config() -> Config:
     try:

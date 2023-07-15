@@ -244,7 +244,7 @@ def tournament_json_decoder(data):
 
 def save_tournaments(tourneys: List[Tournament]):
     with open(constants.TOURNAMENTS_FILENAME, 'w') as tourneysFile:
-        tourneysFile.write(json.dumps(tourneys, default=tournament_json_serializer))
+        tourneysFile.write(json.dumps(tourneys, default=tournament_json_serializer, indent=4))
 
 def load_tournaments() -> List[Tournament]:
     try:

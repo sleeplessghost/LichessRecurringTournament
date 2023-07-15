@@ -18,7 +18,7 @@ class UserInfo:
 
     def save(self):
         with open(constants.USER_INFO_FILENAME, 'w') as userFile:
-            userFile.write(json.dumps(self.__dict__))
+            userFile.write(json.dumps(self.__dict__, indent=4))
 
 def load_user_info() -> UserInfo:
     try:
