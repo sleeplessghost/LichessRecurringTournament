@@ -12,7 +12,7 @@ from models.lichess.RatingRestriction import RatingRestriction
 from models.lichess.TournamentLength import TournamentLength
 from models.lichess.Variant import Variant
 import util.prompts as prompts
-from models.Config import Config, load_config
+from models.config import Config, load_config
 from util.funi import success
 from rich import print
 from rich.markup import escape
